@@ -348,6 +348,11 @@ func main() {
 	router.HandleFunc("/results", handleResults)
 	router.HandleFunc("/standings", handleStandings)
 
-	log.Printf("Web Server starting on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Web Server starting on http://localhost:%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

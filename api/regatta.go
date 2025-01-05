@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"regatta-project/pkg/db"
 
@@ -78,8 +79,14 @@ func main() {
 	router.HandleFunc("/api/regattas/{regattaId}/teams/{teamId}", deleteTeam).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/regattas/{regattaId}/teams/{teamId}", updateTeam).Methods("PUT", "OPTIONS")
 
-	log.Printf("API Server starting on http://localhost:8081")
-	if err := http.ListenAndServe(":8081", router); err != nil {
+	// Set port from environment variable or default to 8081
+	port := "8081" // Default port
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		port = envPort
+	}
+
+	log.Printf("API Server starting on http://localhost:%s", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 }
