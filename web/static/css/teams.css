@@ -1,0 +1,5 @@
+.teams-container {
+    margin: 20px auto; /* Center the container with auto margins */
+    max-width: 1200px; /* Optional: Set a max width for better layout */
+    padding: 20px; /* Add padding for inner spacing */
+}

@@ -1,0 +1,9 @@
+{{define "nav"}}
+<nav>
+    <a href="/dashboard" class="{{if eq .Active "dashboard"}}active{{end}}">Dashboard</a>
+    <a href="/regattas" class="{{if eq .Active "regattas"}}active{{end}}">Regattas</a>
+    <a href="/teams" class="{{if eq .Active "teams"}}active{{end}}">Teams</a>
+    <a href="/results" class="{{if eq .Active "results"}}active{{end}}">Results</a>
+    <a href="/standings" class="{{if eq .Active "standings"}}active{{end}}">Standings</a>
+</nav>
+{{end}} 

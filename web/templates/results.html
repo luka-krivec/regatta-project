@@ -1,0 +1,42 @@
+{{define "content"}}
+<div class="results-container">
+    <div class="card">
+        <div class="card-body">
+            <!-- Regatta Selection -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Select Regatta</label>
+                <select id="resultRegattaSelect" class="form-select" onchange="loadTeamsForScoring()">
+                    <option value="">Choose Regatta</option>
+                </select>
+            </div>
+
+            <!-- New Race Form -->
+            <div id="raceForm">
+                <h5 class="mb-3">Add Race Results</h5>
+                <div class="mb-3">
+                    <label class="form-label">Race Number</label>
+                    <input type="number" id="raceNumber" class="form-control" min="1" placeholder="Enter race number">
+                </div>
+                
+                <!-- Team Scores -->
+                <div id="teamScores" class="mb-3">
+                    <div class="text-muted">Select a regatta to enter scores</div>
+                </div>
+
+                <button class="btn btn-primary" onclick="submitRaceScores()">Save Results</button>
+            </div>
+
+            <!-- Results Display -->
+            <div id="currentStandings" class="mt-4">
+                <!-- Standings will be shown here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/static/css/toast.css">
+<link rel="stylesheet" href="/static/css/results.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="/static/js/results.js"></script>
+{{end}} 

@@ -1,0 +1,42 @@
+.dashboard {
+    padding: 20px;
+}
+.stat-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    transition: transform 0.2s;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+.stat-card:hover {
+    transform: scale(1.05);
+}
+.quick-actions .button {
+    margin-right: 10px;
+}
+.standing-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+}
+.results-list {
+    list-style-type: none;
+    padding: 0;
+}
+.results-list li {
+    padding: 5px 0;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

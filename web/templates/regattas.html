@@ -1,0 +1,75 @@
+{{define "content"}}
+<div class="regatta-container">
+    <div class="card">
+        <div class="card-body">
+            <!-- Create Regatta Form -->
+            <div class="mb-4">
+                <h6 class="mb-3">Create New Regatta</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" id="regattaName" class="form-control" placeholder="Regatta Name">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" id="regattaStartDate" class="form-control" placeholder="Start Date">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" id="regattaEndDate" class="form-control" placeholder="End Date">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="regattaLocation" class="form-control" placeholder="Location">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="createRegatta()">
+                            Create
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regatta List -->
+            <div id="regattaList">
+                <!-- Regattas will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Regatta Modal -->
+    <div class="modal fade" id="editRegattaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Edit Regatta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editRegattaId">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="editRegattaName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Star Date</label>
+                        <input type="date" id="editRegattaStartDate" class="form-control">
+                    </div>
+                    <div class="mb-3"></div>
+                        <label class="form-label">End Date</label>
+                        <input type="date" id="editRegattaEndDate" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" id="editRegattaLocation" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateRegatta()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/static/css/toast.css">
+<link rel="stylesheet" href="/static/css/regattas.css">
+<script src="/static/js/regattas.js"></script>
+{{end}} 

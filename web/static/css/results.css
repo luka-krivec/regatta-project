@@ -1,0 +1,54 @@
+#currentStandings {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.standing-item {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.team-name {
+    font-size: 1.5em;
+    color: #333;
+}
+
+.total-points {
+    font-size: 1.2em;
+    color: #555;
+}
+
+.results-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.result-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.race-number, .position, .points {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.result-item span {
+    margin-right: 10px;
+}
+
+.results-container {
+    margin: 20px auto; /* Center the container with auto margins */
+    max-width: 1200px; /* Optional: Set a max width for better layout */
+    padding: 20px; /* Add padding for inner spacing */
+}
