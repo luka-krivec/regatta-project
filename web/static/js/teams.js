@@ -1,5 +1,5 @@
 // Define API base URL
-const API_BASE_URL = 'http://localhost:8081/api';
+const API_BASE_URL = `http://localhost:${process.env.PORT || 8081}/api`;
 
 async function loadTeamPage() {
     const select = document.getElementById('teamRegattaSelect');
