@@ -2,24 +2,16 @@ package db
 
 import (
 	"database/sql"
-	"path/filepath"
-	"runtime"
+	"os"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
 
 func InitDB() error {
-	// Get the directory where this db.go file is located
-	_, filename, _, _ := runtime.Caller(0)
-	dbDir := filepath.Dir(filename)
-
-	// Construct database path in the same directory as db.go
-	dbPath := filepath.Join(dbDir, "regatta.db")
-
 	var err error
-	DB, err = sql.Open("sqlite3", dbPath)
+	DB, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		return err
 	}
