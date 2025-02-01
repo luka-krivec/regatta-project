@@ -15,6 +15,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Define the base URL for the API
+const baseURL = "https://regatta-project-8fce866eb11d.herokuapp.com/api"
+
 // Types
 type Regatta struct {
 	ID        string `json:"id"`
@@ -67,7 +70,7 @@ func main() {
 	// API routes
 	router.HandleFunc("/api/regattas", createRegatta).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/regattas", getAllRegattas).Methods("GET", "OPTIONS")
-	router.HandleFunc("/apiregattas/{id}", getRegatta).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/regattas/{id}", getRegatta).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/regattas/{id}", updateRegatta).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/regattas/{id}", deleteRegatta).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/regattas/{regattaId}/teams", getRegattaTeams).Methods("GET", "OPTIONS")
@@ -85,7 +88,7 @@ func main() {
 		port = envPort
 	}
 
-	log.Printf("API Server starting on http://localhost:%s", port)
+	log.Printf("API Server starting on %s:%s", baseURL, port)
 	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
@@ -94,7 +97,9 @@ func main() {
 // CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		// Allow requests from Heroku and localhost
+		w.Header().Set("Access-Control-Allow-Origin", "https://regatta-project-8fce866eb11d.herokuapp.com")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080") // Allow localhost for development
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 

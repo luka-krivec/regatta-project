@@ -1,5 +1,5 @@
 // Define API base URL
-const API_BASE_URL = `http://localhost:${process.env.PORT || 8081}/api`;
+const API_BASE_URL = 'https://regatta-project-8fce866eb11d.herokuapp.com/api';
 
 async function loadTeamPage() {
     const select = document.getElementById('teamRegattaSelect');

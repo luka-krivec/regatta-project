@@ -1,11 +1,10 @@
 async function loadDashboardData() {
-    // Check environment variable PORT
-    const port = process.env.PORT || 8080; // Default to 8080 if PORT is not set
-    console.log(`Server is running on port: ${port}`);
+    // Use the Heroku URL for API calls
+    const baseUrl = 'https://regatta-project-8fce866eb11d.herokuapp.com/';
     
     try {
         // Load stats
-        const statsResponse = await fetch(`http://localhost:${port}/api/dashboard/stats`);
+        const statsResponse = await fetch(`${baseUrl}api/dashboard/stats`);
         const stats = await statsResponse.json();
         
         // Update stat cards
@@ -15,7 +14,7 @@ async function loadDashboardData() {
         document.getElementById('upcomingRacesCount').textContent = stats.upcomingRaces || 0;
 
         // Load recent regattas
-        const regattasResponse = await fetch(`http://localhost:${port}/api/regattas?limit=5`);
+        const regattasResponse = await fetch(`${baseUrl}api/regattas?limit=5`);
         const regattas = await regattasResponse.json();
         
         // Update recent regattas table
