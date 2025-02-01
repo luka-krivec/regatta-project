@@ -71,6 +71,8 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data PageData) {
 		return
 	}
 
+	cwd = filepath.Join(cwd, "web")
+
 	// Define template files with absolute paths
 	files := []string{
 		filepath.Join(cwd, "templates", "layout.html"),
