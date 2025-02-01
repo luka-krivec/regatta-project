@@ -16,6 +16,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Define the base URL for the API
+const baseAPIURL = "https://regatta-project-8fce866eb11d.herokuapp.com/api"
+
 type PageData struct {
 	Title  string
 	Active string
@@ -107,7 +110,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data PageData) {
 
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
 	// Call the API to get dashboard stats
-	resp, err := http.Get("http://localhost:8080/api/dashboard/stats")
+	resp, err := http.Get(fmt.Sprintf("%s/dashboard/stats", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching dashboard stats from API: %v", err)
 		renderTemplate(w, "dashboard", PageData{
@@ -145,8 +148,8 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRegattas(w http.ResponseWriter, r *http.Request) {
-	// Use port 8081 to communicate with the API service
-	resp, err := http.Get("http://localhost:8081/api/regattas")
+	// Use the Heroku URL for API calls
+	resp, err := http.Get(fmt.Sprintf("%s/regattas", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching regattas: %v", err)
 		renderTemplate(w, "regattas", PageData{
@@ -197,7 +200,7 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the correct API endpoint with regattaId
-	resp, err := http.Get(fmt.Sprintf("http://localhost:8081/api/regattas/%s/teams", regattaId))
+	resp, err := http.Get(fmt.Sprintf("%s/regattas/%s/teams", baseAPIURL, regattaId))
 	if err != nil {
 		log.Printf("Error fetching teams from API: %v", err)
 		renderTemplate(w, "teams", PageData{
@@ -234,7 +237,7 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 
 func handleResults(w http.ResponseWriter, r *http.Request) {
 	// Call the API to get results
-	resp, err := http.Get("http://localhost:8081/api/results")
+	resp, err := http.Get(fmt.Sprintf("%s/results", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching results from API: %v", err)
 		renderTemplate(w, "results", PageData{
@@ -271,7 +274,7 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 
 func handleStandings(w http.ResponseWriter, r *http.Request) {
 	// Call the API to get standings
-	resp, err := http.Get("http://localhost:8081/api/standings")
+	resp, err := http.Get(fmt.Sprintf("%s/standings", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching standings from API: %v", err)
 		renderTemplate(w, "standings", PageData{
@@ -307,7 +310,8 @@ func handleStandings(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDashboardStats(w http.ResponseWriter, r *http.Request) {
-	resp, err := http.Get("http://localhost:8081/api/dashboard/stats")
+	resp, err := http.Get(fmt.Sprintf("%s/dashboard/stats", baseAPIURL))
+
 	if err != nil {
 		http.Error(w, "Error fetching dashboard stats", http.StatusInternalServerError)
 		return
@@ -353,6 +357,6 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Web Server starting on http://localhost:%s", port)
+	log.Printf("Web Server starting on %s:%s", baseAPIURL, port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
