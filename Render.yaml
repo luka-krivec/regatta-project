@@ -1,0 +1,17 @@
+version: 1
+services:
+  - type: web
+    name: regatta-web
+    env: go
+    buildCommand: go build -o webapp ./web/web-regatta.go
+    startCommand: ./webapp
+    autoDeploy: true
+    region: oregon  # or your preferred region
+
+  - type: web
+    name: regatta-api
+    env: go
+    buildCommand: go build -o apiapp ./api/regatta.go
+    startCommand: ./apiapp
+    autoDeploy: true
+    region: oregon  # or your preferred regionS
