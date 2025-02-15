@@ -16,7 +16,7 @@ import (
 )
 
 // Define the base URL for the API
-const baseURL = "https://regatta-project-8fce866eb11d.herokuapp.com/api"
+const baseURL = "https://regatta-project.onrender.com/api"
 
 // Types
 type Regatta struct {
