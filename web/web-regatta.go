@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/fs"
 	"github.com/gorilla/mux"
 )
 
@@ -334,8 +333,7 @@ func main() {
 	router := mux.NewRouter()
 
 	// Create a file server using the embedded file system
-	contentFS, _ := fs.Sub(content, "static")
-	fs := http.FileServer(http.FS(contentFS))
+	fs := http.FileServer(http.FS(content))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
 	// API routes
