@@ -98,7 +98,7 @@ func main() {
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Allow requests from Heroku and localhost
-		w.Header().Set("Access-Control-Allow-Origin", "https://regatta-project-8fce866eb11d.herokuapp.com")
+		w.Header().Set("Access-Control-Allow-Origin", "https://regatta-project.onrender.com")
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080") // Allow localhost for development
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
