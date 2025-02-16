@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -13,8 +14,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/fs"
 	"github.com/gorilla/mux"
 )
+
+//go:embed static/*
+var content embed.FS
 
 // Define the base URL for the API
 const baseAPIURL = "https://regatta-project.onrender.com/api"
@@ -328,20 +333,10 @@ func handleDashboardStats(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter()
 
-	// Create a custom file server with proper MIME types
-	fs := http.FileServer(http.Dir("static"))
-	router.PathPrefix("/static/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set correct MIME types
-		switch {
-		case strings.HasSuffix(r.URL.Path, ".js"):
-			w.Header().Set("Content-Type", "application/javascript")
-		case strings.HasSuffix(r.URL.Path, ".css"):
-			w.Header().Set("Content-Type", "text/css")
-		}
-		// Remove /static/ prefix from path
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/static/")
-		fs.ServeHTTP(w, r)
-	})
+	// Create a file server using the embedded file system
+	contentFS, _ := fs.Sub(content, "static")
+	fs := http.FileServer(http.FS(contentFS))
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
 	// API routes
 	router.HandleFunc("/api/dashboard/stats", handleDashboardStats)
