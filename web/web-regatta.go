@@ -343,7 +343,9 @@ func handleDashboardStats(c *gin.Context) {
 }
 
 func main() {
-	router := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+
+	router := gin.New()
 
 	// Serve static files from the "static" directory inside the "web" folder
 	router.Static("/static", "./static")
