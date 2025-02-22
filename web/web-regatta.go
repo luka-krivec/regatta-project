@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 //go:embed static/*
@@ -24,9 +24,10 @@ var baseAPIURL = os.Getenv("API_URL")
 var baseWebURL = os.Getenv("BASE_URL")
 
 type PageData struct {
-	Title  string
-	Active string
-	Data   interface{}
+	Title   string
+	Active  string
+	Data    interface{}
+	API_URL string
 }
 
 type StandingsData struct {
@@ -114,15 +115,16 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data PageData) {
 	}
 }
 
-func handleDashboard(w http.ResponseWriter, r *http.Request) {
+func handleDashboard(c *gin.Context) {
 	// Call the API to get dashboard stats
 	resp, err := http.Get(fmt.Sprintf("%s/dashboard/stats", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching dashboard stats from API: %v", err)
-		renderTemplate(w, "dashboard", PageData{
-			Title:  "Dashboard",
-			Active: "dashboard",
-			Data:   DashboardData{},
+		c.HTML(http.StatusOK, "dashboard.html", PageData{
+			Title:   "Dashboard",
+			Active:  "dashboard",
+			Data:    DashboardData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -138,30 +140,33 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 	var stats DashboardData
 	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		log.Printf("Error decoding dashboard stats: %v", err)
-		renderTemplate(w, "dashboard", PageData{
-			Title:  "Dashboard",
-			Active: "dashboard",
-			Data:   DashboardData{},
+		c.HTML(http.StatusOK, "dashboard.html", PageData{
+			Title:   "Dashboard",
+			Active:  "dashboard",
+			Data:    DashboardData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
 
-	renderTemplate(w, "dashboard", PageData{
-		Title:  "Dashboard",
-		Active: "dashboard",
-		Data:   stats,
+	c.HTML(http.StatusOK, "dashboard.html", PageData{
+		Title:   "Dashboard",
+		Active:  "dashboard",
+		Data:    stats,
+		API_URL: baseAPIURL,
 	})
 }
 
-func handleRegattas(w http.ResponseWriter, r *http.Request) {
+func handleRegattas(c *gin.Context) {
 	// Use the Heroku URL for API calls
 	resp, err := http.Get(fmt.Sprintf("%s/regattas", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching regattas: %v", err)
-		renderTemplate(w, "regattas", PageData{
-			Title:  "Manage Regattas",
-			Active: "regattas",
-			Data:   []RegattaData{},
+		c.HTML(http.StatusOK, "regattas.html", PageData{
+			Title:   "Manage Regattas",
+			Active:  "regattas",
+			Data:    []RegattaData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -177,30 +182,33 @@ func handleRegattas(w http.ResponseWriter, r *http.Request) {
 	var regattas []RegattaData
 	if err := json.NewDecoder(resp.Body).Decode(&regattas); err != nil {
 		log.Printf("Error decoding regattas: %v", err)
-		renderTemplate(w, "regattas", PageData{
-			Title:  "Manage Regattas",
-			Active: "regattas",
-			Data:   []RegattaData{},
+		c.HTML(http.StatusOK, "regattas.html", PageData{
+			Title:   "Manage Regattas",
+			Active:  "regattas",
+			Data:    []RegattaData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
 
-	renderTemplate(w, "regattas", PageData{
-		Title:  "Manage Regattas",
-		Active: "regattas",
-		Data:   regattas,
+	c.HTML(http.StatusOK, "regattas.html", PageData{
+		Title:   "Manage Regattas",
+		Active:  "regattas",
+		Data:    regattas,
+		API_URL: baseAPIURL,
 	})
 }
 
-func handleTeams(w http.ResponseWriter, r *http.Request) {
+func handleTeams(c *gin.Context) {
 	// Get regattaId from query parameter
-	regattaId := r.URL.Query().Get("regattaId")
+	regattaId := c.Query("regattaId")
 	if regattaId == "" {
 		log.Printf("No regattaId provided")
-		renderTemplate(w, "teams", PageData{
-			Title:  "Manage Teams",
-			Active: "teams",
-			Data:   []TeamData{},
+		c.HTML(http.StatusOK, "teams.html", PageData{
+			Title:   "Manage Teams",
+			Active:  "teams",
+			Data:    []TeamData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -209,10 +217,11 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(fmt.Sprintf("%s/regattas/%s/teams", baseAPIURL, regattaId))
 	if err != nil {
 		log.Printf("Error fetching teams from API: %v", err)
-		renderTemplate(w, "teams", PageData{
-			Title:  "Manage Teams",
-			Active: "teams",
-			Data:   []TeamData{},
+		c.HTML(http.StatusOK, "teams.html", PageData{
+			Title:   "Manage Teams",
+			Active:  "teams",
+			Data:    []TeamData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -226,30 +235,33 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 	var teams []TeamData
 	if err := json.NewDecoder(resp.Body).Decode(&teams); err != nil {
 		log.Printf("Error decoding teams: %v", err)
-		renderTemplate(w, "teams", PageData{
-			Title:  "Manage Teams",
-			Active: "teams",
-			Data:   []TeamData{},
+		c.HTML(http.StatusOK, "teams.html", PageData{
+			Title:   "Manage Teams",
+			Active:  "teams",
+			Data:    []TeamData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
 
-	renderTemplate(w, "teams", PageData{
-		Title:  "Manage Teams",
-		Active: "teams",
-		Data:   teams,
+	c.HTML(http.StatusOK, "teams.html", PageData{
+		Title:   "Manage Teams",
+		Active:  "teams",
+		Data:    teams,
+		API_URL: baseAPIURL,
 	})
 }
 
-func handleResults(w http.ResponseWriter, r *http.Request) {
+func handleResults(c *gin.Context) {
 	// Call the API to get results
 	resp, err := http.Get(fmt.Sprintf("%s/results", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching results from API: %v", err)
-		renderTemplate(w, "results", PageData{
-			Title:  "Race Results",
-			Active: "results",
-			Data:   []RaceResultData{},
+		c.HTML(http.StatusOK, "results.html", PageData{
+			Title:   "Race Results",
+			Active:  "results",
+			Data:    []RaceResultData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -263,30 +275,33 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 	var results []RaceResultData
 	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
 		log.Printf("Error decoding results: %v", err)
-		renderTemplate(w, "results", PageData{
-			Title:  "Race Results",
-			Active: "results",
-			Data:   []RaceResultData{},
+		c.HTML(http.StatusOK, "results.html", PageData{
+			Title:   "Race Results",
+			Active:  "results",
+			Data:    []RaceResultData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
 
-	renderTemplate(w, "results", PageData{
-		Title:  "Race Results",
-		Active: "results",
-		Data:   results,
+	c.HTML(http.StatusOK, "results.html", PageData{
+		Title:   "Race Results",
+		Active:  "results",
+		Data:    results,
+		API_URL: baseAPIURL,
 	})
 }
 
-func handleStandings(w http.ResponseWriter, r *http.Request) {
+func handleStandings(c *gin.Context) {
 	// Call the API to get standings
 	resp, err := http.Get(fmt.Sprintf("%s/standings", baseAPIURL))
 	if err != nil {
 		log.Printf("Error fetching standings from API: %v", err)
-		renderTemplate(w, "standings", PageData{
-			Title:  "Current Standings",
-			Active: "standings",
-			Data:   []StandingsData{},
+		c.HTML(http.StatusOK, "standings.html", PageData{
+			Title:   "Current Standings",
+			Active:  "standings",
+			Data:    []StandingsData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
@@ -300,67 +315,53 @@ func handleStandings(w http.ResponseWriter, r *http.Request) {
 	var standings []StandingsData
 	if err := json.NewDecoder(resp.Body).Decode(&standings); err != nil {
 		log.Printf("Error decoding standings: %v", err)
-		renderTemplate(w, "standings", PageData{
-			Title:  "Current Standings",
-			Active: "standings",
-			Data:   []StandingsData{},
+		c.HTML(http.StatusOK, "standings.html", PageData{
+			Title:   "Current Standings",
+			Active:  "standings",
+			Data:    []StandingsData{},
+			API_URL: baseAPIURL,
 		})
 		return
 	}
 
-	renderTemplate(w, "standings", PageData{
-		Title:  "Current Standings",
-		Active: "standings",
-		Data:   standings,
+	c.HTML(http.StatusOK, "standings.html", PageData{
+		Title:   "Current Standings",
+		Active:  "standings",
+		Data:    standings,
+		API_URL: baseAPIURL,
 	})
 }
 
-func handleDashboardStats(w http.ResponseWriter, r *http.Request) {
+func handleDashboardStats(c *gin.Context) {
 	resp, err := http.Get(fmt.Sprintf("%s/dashboard/stats", baseAPIURL))
 
 	if err != nil {
-		http.Error(w, "Error fetching dashboard stats", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching dashboard stats"})
 		return
 	}
 	defer resp.Body.Close()
 
 	// Copy the API response to our response
-	w.Header().Set("Content-Type", "application/json")
-	io.Copy(w, resp.Body)
+	c.Header("Content-Type", "application/json")
+	io.Copy(c.Writer, resp.Body)
 }
 
 func main() {
-	router := mux.NewRouter()
+	router := gin.Default()
 
-	// Create a custom file server with proper MIME types
-	router.PathPrefix("/static/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set correct MIME types based on file extension
-		switch {
-		case strings.HasSuffix(r.URL.Path, ".js"):
-			w.Header().Set("Content-Type", "application/javascript")
-		case strings.HasSuffix(r.URL.Path, ".css"):
-			w.Header().Set("Content-Type", "text/css")
-		case strings.HasSuffix(r.URL.Path, ".html"):
-			w.Header().Set("Content-Type", "text/html")
-		case strings.HasSuffix(r.URL.Path, ".json"):
-			w.Header().Set("Content-Type", "application/json")
-			// Add more MIME types as needed
-		}
-
-		// Serve the file from the embedded filesystem
-		http.FileServer(http.FS(content)).ServeHTTP(w, r)
-	})
+	// Serve static files
+	router.StaticFS("/static", http.FS(content))
 
 	// API routes
-	router.HandleFunc("/api/dashboard/stats", handleDashboardStats)
+	router.GET("/api/dashboard/stats", handleDashboardStats)
 
 	// Page routes
-	router.HandleFunc("/", handleDashboard)
-	router.HandleFunc("/dashboard", handleDashboard)
-	router.HandleFunc("/regattas", handleRegattas)
-	router.HandleFunc("/teams", handleTeams)
-	router.HandleFunc("/results", handleResults)
-	router.HandleFunc("/standings", handleStandings)
+	router.GET("/", handleDashboard)
+	router.GET("/dashboard", handleDashboard)
+	router.GET("/regattas", handleRegattas)
+	router.GET("/teams", handleTeams)
+	router.GET("/results", handleResults)
+	router.GET("/standings", handleStandings)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -368,10 +369,7 @@ func main() {
 	}
 
 	log.Printf("Web Server starting on %s:%s", baseWebURL, port)
-
-	// Combine baseWebURL and port for ListenAndServe
-	//address := baseWebURL + ":" + port
-	address := baseWebURL
-
-	log.Fatal(http.ListenAndServe(address, router))
+	if err := router.Run(fmt.Sprintf("%s:%s", baseWebURL, port)); err != nil {
+		log.Fatal(err)
+	}
 }
