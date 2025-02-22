@@ -16,9 +16,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed static/*
-//var content embed.FS
-
 var baseAPIURL = os.Getenv("API_URL")
 var baseWebURL = os.Getenv("BASE_URL")
 
@@ -368,7 +365,7 @@ func main() {
 	}
 
 	log.Printf("Web Server starting on %s:%s", baseWebURL, port)
-	if err := router.Run(fmt.Sprintf("%s:%s", baseWebURL, port)); err != nil {
+	if err := router.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}
 }
