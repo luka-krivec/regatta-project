@@ -1,5 +1,6 @@
 // Define API base URL
-const API_BASE_URL = 'https://regatta-project-8fce866eb11d.herokuapp.com/api';
+const API_BASE_URL = 'https://regatta-project.onrender.com/api';
+//const API_BASE_URL = 'http://localhost:8081/api';
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {

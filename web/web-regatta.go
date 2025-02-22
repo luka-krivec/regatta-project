@@ -20,8 +20,8 @@ import (
 //go:embed static/*
 var content embed.FS
 
-// Define the base URL for the API
-const baseAPIURL = "https://regatta-project.onrender.com/api"
+var baseAPIURL = os.Getenv("API_URL")
+var baseWebURL = os.Getenv("BASE_URL")
 
 type PageData struct {
 	Title  string
@@ -75,7 +75,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data PageData) {
 		return
 	}
 
-	cwd = filepath.Join(cwd, "web")
+	//cwd = filepath.Join(cwd, "web")
 
 	// Define template files with absolute paths
 	files := []string{
@@ -332,9 +332,18 @@ func handleDashboardStats(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter()
 
-	// Create a file server using the embedded file system
-	fs := http.FileServer(http.FS(content))
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	// Create a custom file server with proper MIME types
+	router.PathPrefix("/static/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set correct MIME types based on file extension
+		switch {
+		case strings.HasSuffix(r.URL.Path, ".js"):
+			w.Header().Set("Content-Type", "application/javascript")
+		case strings.HasSuffix(r.URL.Path, ".css"):
+			w.Header().Set("Content-Type", "text/css")
+		}
+		// Serve the file from the embedded filesystem
+		http.FileServer(http.FS(content)).ServeHTTP(w, r)
+	})
 
 	// API routes
 	router.HandleFunc("/api/dashboard/stats", handleDashboardStats)
@@ -352,6 +361,18 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Web Server starting on %s:%s", baseAPIURL, port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	// Log the server starting address
+	if port == "8080" { // Default port, log with baseWebURL and port
+		log.Printf("Web Server starting on %s:%s", baseWebURL, port)
+	} else { // Custom port, log with baseWebURL only
+		log.Printf("Web Server starting on %s", baseWebURL)
+	}
+
+	// Combine baseWebURL and port for ListenAndServe
+	address := baseWebURL
+	if port == "8080" {
+		address += ":" + port // Append port only if it's the default
+	}
+
+	log.Fatal(http.ListenAndServe(address, router))
 }

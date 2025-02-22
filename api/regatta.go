@@ -16,7 +16,7 @@ import (
 )
 
 // Define the base URL for the API
-const baseURL = "https://regatta-project.onrender.com/api"
+var baseURL = os.Getenv("BASE_URL")
 
 // Types
 type Regatta struct {
@@ -82,14 +82,25 @@ func main() {
 	router.HandleFunc("/api/regattas/{regattaId}/teams/{teamId}", deleteTeam).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/api/regattas/{regattaId}/teams/{teamId}", updateTeam).Methods("PUT", "OPTIONS")
 
-	// Set port from environment variable or default to 8081
-	port := "8081" // Default port
-	if envPort := os.Getenv("PORT"); envPort != "" {
-		port = envPort
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
 	}
 
-	log.Printf("API Server starting on %s:%s", baseURL, port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	// Log the server starting address
+	if port == "8081" { // Default port, log with baseURL and port
+		log.Printf("API Server starting on %s:%s", baseURL, port)
+	} else { // Custom port, log with baseURL only
+		log.Printf("API Server starting on %s", baseURL)
+	}
+
+	// Combine baseURL and port for ListenAndServe
+	address := baseURL
+	if port == "8081" {
+		address += ":" + port
+	}
+
+	if err := http.ListenAndServe(address, router); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -114,8 +125,11 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 // Handler functions
 func createRegatta(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received request to create a regatta")
+
 	var regatta Regatta
 	if err := json.NewDecoder(r.Body).Decode(&regatta); err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -123,8 +137,9 @@ func createRegatta(w http.ResponseWriter, r *http.Request) {
 	regatta.ID = uuid.New().String()
 	regatta.Status = "SCHEDULED"
 
-	stmt, err := db.DB.Prepare("INSERT INTO regattas(id, name, start_date, end_date, location, status) VALUES(?, ?, ?, ?, ?, ?)")
+	stmt, err := db.DB.Prepare("INSERT INTO regattas(id, name, start_date, end_date, location, status) VALUES($1, $2, $3, $4, $5, $6)")
 	if err != nil {
+		log.Printf("Error preparing SQL statement: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -132,9 +147,12 @@ func createRegatta(w http.ResponseWriter, r *http.Request) {
 
 	_, err = stmt.Exec(regatta.ID, regatta.Name, regatta.StartDate, regatta.EndDate, regatta.Location, regatta.Status)
 	if err != nil {
+		log.Printf("Error executing SQL statement: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("Successfully created regatta: %+v", regatta)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(regatta)
@@ -149,7 +167,7 @@ func getRegattaStandings(w http.ResponseWriter, r *http.Request) {
 		SELECT r.team_id, t.name, r.race_number, r.position, r.points 
 		FROM race_results r 
 		JOIN teams t ON r.team_id = t.id 
-		WHERE r.regatta_id = ?`, regattaId)
+		WHERE r.regatta_id = $1`, regattaId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -186,8 +204,11 @@ func getRegattaStandings(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllRegattas(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received request to get all regattas")
+
 	rows, err := db.DB.Query("SELECT id, name, start_date, end_date, location FROM regattas")
 	if err != nil {
+		log.Printf("Error fetching regattas: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -197,11 +218,14 @@ func getAllRegattas(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var regatta Regatta
 		if err := rows.Scan(&regatta.ID, &regatta.Name, &regatta.StartDate, &regatta.EndDate, &regatta.Location); err != nil {
+			log.Printf("Error scanning regatta: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		regattas = append(regattas, regatta)
 	}
+
+	log.Printf("Successfully retrieved %d regattas", len(regattas))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(regattas)
@@ -211,14 +235,19 @@ func getRegatta(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	log.Printf("Received request to get regatta with ID: %s", id)
+
 	var regatta Regatta
-	err := db.DB.QueryRow("SELECT id, name, start_date, end_date, location, status FROM regattas WHERE id = ?", id).
+	err := db.DB.QueryRow("SELECT id, name, start_date, end_date, location, status FROM regattas WHERE id = $1", id).
 		Scan(&regatta.ID, &regatta.Name, &regatta.StartDate, &regatta.EndDate, &regatta.Location, &regatta.Status)
 
 	if err != nil {
+		log.Printf("Error fetching regatta: %v", err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+
+	log.Printf("Successfully retrieved regatta: %+v", regatta)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(regatta)
@@ -228,18 +257,24 @@ func updateRegatta(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	log.Printf("Received request to update regatta with ID: %s", id)
+
 	var regatta Regatta
 	if err := json.NewDecoder(r.Body).Decode(&regatta); err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	_, err := db.DB.Exec("UPDATE regattas SET name=?, start_date=?, end_date=?, location=?, status=? WHERE id=?",
+	_, err := db.DB.Exec("UPDATE regattas SET name=$1, start_date=$2, end_date=$3, location=$4, status=$5 WHERE id=$6",
 		regatta.Name, regatta.StartDate, regatta.EndDate, regatta.Location, regatta.Status, id)
 	if err != nil {
+		log.Printf("Error updating regatta: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("Successfully updated regatta with ID: %s", id)
 
 	w.Header().Set("Content-Type", "application/json")
 	regatta.ID = id
@@ -250,11 +285,16 @@ func deleteRegatta(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	_, err := db.DB.Exec("DELETE FROM regattas WHERE id = ?", id)
+	log.Printf("Received request to delete regatta with ID: %s", id)
+
+	_, err := db.DB.Exec("DELETE FROM regattas WHERE id = $1", id)
 	if err != nil {
+		log.Printf("Error deleting regatta: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("Successfully deleted regatta with ID: %s", id)
 
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -263,7 +303,7 @@ func getRegattaTeams(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	regattaId := vars["regattaId"]
 
-	rows, err := db.DB.Query("SELECT id, name, regatta_id FROM teams WHERE regatta_id = ?", regattaId)
+	rows, err := db.DB.Query("SELECT id, name, regatta_id FROM teams WHERE regatta_id = $1", regattaId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -297,7 +337,7 @@ func addTeam(w http.ResponseWriter, r *http.Request) {
 	team.ID = uuid.New().String()
 	team.RegattaID = regattaId
 
-	_, err := db.DB.Exec("INSERT INTO teams(id, name, regatta_id) VALUES(?, ?, ?)",
+	_, err := db.DB.Exec("INSERT INTO teams(id, name, regatta_id) VALUES($1, $2, $3)",
 		team.ID, team.Name, team.RegattaID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -334,7 +374,7 @@ func addRaceResults(w http.ResponseWriter, r *http.Request) {
 		result.ID = uuid.New().String()
 
 		// Insert the race result into the database
-		_, err := db.DB.Exec("INSERT INTO race_results (id, regatta_id, team_id, race_number, position, points) VALUES (?, ?, ?, ?, ?, ?)",
+		_, err := db.DB.Exec("INSERT INTO race_results (id, regatta_id, team_id, race_number, position, points) VALUES ($1, $2, $3, $4, $5, $6)",
 			result.ID, result.RegattaID, result.TeamID, result.RaceNumber, result.Position, result.Points)
 
 		if err != nil {
@@ -359,7 +399,7 @@ func clearRegattaResults(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	regattaId := vars["regattaId"]
 
-	_, err := db.DB.Exec("DELETE FROM race_results WHERE regatta_id = ?", regattaId)
+	_, err := db.DB.Exec("DELETE FROM race_results WHERE regatta_id = $1", regattaId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -417,7 +457,7 @@ func deleteTeam(w http.ResponseWriter, r *http.Request) {
 
 	// First verify the team belongs to the regatta
 	var count int
-	err := db.DB.QueryRow("SELECT COUNT(*) FROM teams WHERE id = ? AND regatta_id = ?", teamId, regattaId).Scan(&count)
+	err := db.DB.QueryRow("SELECT COUNT(*) FROM teams WHERE id = $1 AND regatta_id = $2", teamId, regattaId).Scan(&count)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -428,7 +468,7 @@ func deleteTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the team
-	_, err = db.DB.Exec("DELETE FROM teams WHERE id = ? AND regatta_id = ?", teamId, regattaId)
+	_, err = db.DB.Exec("DELETE FROM teams WHERE id = $1 AND regatta_id = $2", teamId, regattaId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -474,7 +514,7 @@ func updateTeam(w http.ResponseWriter, r *http.Request) {
 
 	// Verify team exists and belongs to regatta
 	var count int
-	err = db.DB.QueryRow("SELECT COUNT(*) FROM teams WHERE id = ? AND regatta_id = ?", teamId, regattaId).Scan(&count)
+	err = db.DB.QueryRow("SELECT COUNT(*) FROM teams WHERE id = $1 AND regatta_id = $2", teamId, regattaId).Scan(&count)
 	if err != nil {
 		log.Printf("Error checking team existence: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -488,7 +528,7 @@ func updateTeam(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Team verification successful - Found %d matching teams", count)
 
 	// Update the team
-	result, err := db.DB.Exec("UPDATE teams SET name = ? WHERE id = ? AND regatta_id = ?",
+	result, err := db.DB.Exec("UPDATE teams SET name = $1 WHERE id = $2 AND regatta_id = $3",
 		team.Name, teamId, regattaId)
 	if err != nil {
 		log.Printf("Error executing update query: %v", err)

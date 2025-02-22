@@ -1,7 +1,8 @@
 async function loadDashboardData() {
     // Use the Heroku URL for API calls
-    const baseUrl = 'https://regatta-project-8fce866eb11d.herokuapp.com/';
-    
+    const baseUrl = 'https://regatta-project.onrender.com/api';
+    //const baseUrl = 'http://localhost:8081/api'
+
     try {
         // Load stats
         const statsResponse = await fetch(`${baseUrl}api/dashboard/stats`);
