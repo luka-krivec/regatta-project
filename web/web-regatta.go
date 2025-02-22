@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,7 +17,7 @@ import (
 )
 
 //go:embed static/*
-var content embed.FS
+//var content embed.FS
 
 var baseAPIURL = os.Getenv("API_URL")
 var baseWebURL = os.Getenv("BASE_URL")
@@ -349,8 +348,8 @@ func handleDashboardStats(c *gin.Context) {
 func main() {
 	router := gin.Default()
 
-	// Serve static files
-	router.StaticFS("/static", http.FS(content))
+	// Serve static files from the "static" directory inside the "web" folder
+	router.Static("/static", "./static")
 
 	// API routes
 	router.GET("/api/dashboard/stats", handleDashboardStats)
