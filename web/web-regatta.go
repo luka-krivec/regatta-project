@@ -340,7 +340,13 @@ func main() {
 			w.Header().Set("Content-Type", "application/javascript")
 		case strings.HasSuffix(r.URL.Path, ".css"):
 			w.Header().Set("Content-Type", "text/css")
+		case strings.HasSuffix(r.URL.Path, ".html"):
+			w.Header().Set("Content-Type", "text/html")
+		case strings.HasSuffix(r.URL.Path, ".json"):
+			w.Header().Set("Content-Type", "application/json")
+			// Add more MIME types as needed
 		}
+
 		// Serve the file from the embedded filesystem
 		http.FileServer(http.FS(content)).ServeHTTP(w, r)
 	})
