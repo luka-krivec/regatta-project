@@ -361,18 +361,10 @@ func main() {
 		port = "8080"
 	}
 
-	// Log the server starting address
-	if port == "8080" { // Default port, log with baseWebURL and port
-		log.Printf("Web Server starting on %s:%s", baseWebURL, port)
-	} else { // Custom port, log with baseWebURL only
-		log.Printf("Web Server starting on %s", baseWebURL)
-	}
+	log.Printf("Web Server starting on %s:%s", baseWebURL, port)
 
 	// Combine baseWebURL and port for ListenAndServe
-	address := baseWebURL
-	if port == "8080" {
-		address += ":" + port // Append port only if it's the default
-	}
+	address := baseWebURL + ":" + port
 
 	log.Fatal(http.ListenAndServe(address, router))
 }
