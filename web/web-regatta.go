@@ -364,7 +364,8 @@ func main() {
 	log.Printf("Web Server starting on %s:%s", baseWebURL, port)
 
 	// Combine baseWebURL and port for ListenAndServe
-	address := baseWebURL + ":" + port
+	//address := baseWebURL + ":" + port
+	address := baseWebURL
 
 	log.Fatal(http.ListenAndServe(address, router))
 }
